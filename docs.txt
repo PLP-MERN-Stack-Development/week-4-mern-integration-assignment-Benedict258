@@ -1,0 +1,1 @@
+mongodb+srv://Benedict258:Benisaac@258@mern-blog-cluster.sjyjgme.mongodb.net/?retryWrites=true&w=majority&appName=mern-blog-cluster

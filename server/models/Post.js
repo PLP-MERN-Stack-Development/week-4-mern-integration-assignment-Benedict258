@@ -1,100 +1,87 @@
-// Post.js - Mongoose model for blog posts
-
 const mongoose = require('mongoose');
 
-const PostSchema = new mongoose.Schema(
-  {
-    title: {
-      type: String,
-      required: [true, 'Please provide a title'],
-      trim: true,
-      maxlength: [100, 'Title cannot be more than 100 characters'],
-    },
-    content: {
-      type: String,
-      required: [true, 'Please provide content'],
-    },
-    featuredImage: {
-      type: String,
-      default: 'default-post.jpg',
-    },
-    slug: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    excerpt: {
-      type: String,
-      maxlength: [200, 'Excerpt cannot be more than 200 characters'],
-    },
-    author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category',
-      required: true,
-    },
-    tags: [String],
-    isPublished: {
-      type: Boolean,
-      default: false,
-    },
-    viewCount: {
-      type: Number,
-      default: 0,
-    },
-    comments: [
-      {
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'User',
-        },
-        content: {
-          type: String,
-          required: true,
-        },
-        createdAt: {
-          type: Date,
-          default: Date.now,
-        },
-      },
-    ],
+const CommentSchema = new mongoose.Schema({
+  content: {
+    type: String,
+    required: [true, 'Please add comment content'],
+    maxlength: [1000, 'Comment cannot be more than 1000 characters']
   },
-  { timestamps: true }
-);
-
-// Create slug from title before saving
-PostSchema.pre('save', function (next) {
-  if (!this.isModified('title')) {
-    return next();
+  author: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: true
   }
-  
-  this.slug = this.title
-    .toLowerCase()
-    .replace(/[^\w ]+/g, '')
-    .replace(/ +/g, '-');
-    
+}, {
+  timestamps: true
+});
+
+const PostSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: [true, 'Please add a title'],
+    trim: true,
+    maxlength: [100, 'Title cannot be more than 100 characters']
+  },
+  content: {
+    type: String,
+    required: [true, 'Please add content'],
+    maxlength: [10000, 'Content cannot be more than 10000 characters']
+  },
+  excerpt: {
+    type: String,
+    maxlength: [300, 'Excerpt cannot be more than 300 characters']
+  },
+  slug: {
+    type: String,
+    unique: true
+  },
+  featuredImage: {
+    type: String,
+    default: 'no-photo.jpg'
+  },
+  published: {
+    type: Boolean,
+    default: false
+  },
+  author: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  category: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Category',
+    required: [true, 'Please select a category']
+  },
+  tags: [{
+    type: String,
+    trim: true
+  }],
+  comments: [CommentSchema],
+  likes: [{
+    type: mongoose.Schema.ObjectId,
+    ref: 'User'
+  }],
+  views: {
+    type: Number,
+    default: 0
+  }
+}, {
+  timestamps: true
+});
+
+// Automatically generate slug from title
+PostSchema.pre('save', function (next) {
+  this.slug = this.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
   next();
 });
 
-// Virtual for post URL
-PostSchema.virtual('url').get(function () {
-  return `/posts/${this.slug}`;
+// Automatically create excerpt if not provided
+PostSchema.pre('save', function (next) {
+  if (!this.excerpt && this.content) {
+    this.excerpt = this.content.substring(0, 150) + '...';
+  }
+  next();
 });
 
-// Method to add a comment
-PostSchema.methods.addComment = function (userId, content) {
-  this.comments.push({ user: userId, content });
-  return this.save();
-};
-
-// Method to increment view count
-PostSchema.methods.incrementViewCount = function () {
-  this.viewCount += 1;
-  return this.save();
-};
-
-module.exports = mongoose.model('Post', PostSchema); 
+module.exports = mongoose.model('Post', PostSchema);
