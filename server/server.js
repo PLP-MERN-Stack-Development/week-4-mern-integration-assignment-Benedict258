@@ -32,10 +32,14 @@ app.use(express.json());
 
 // Enable CORS
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? ['https://your-domain.com']
-    : ['http://localhost:3000', 'http://localhost:5173'],
-  credentials: true
+  origin: [
+    'https://mern-blog-5h98.onrender.com', // your deployed frontend
+    'http://localhost:3000',
+    'http://localhost:5173'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Security headers
