@@ -8,7 +8,7 @@ const EditPost = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { data: postData, isLoading } = usePost(id)
+  const { data: postData, isLoading, error } = usePost(id)
   const updatePostMutation = useUpdatePost()
 
   const post = postData?.data?.data
@@ -17,26 +17,25 @@ const EditPost = () => {
     try {
       await updatePostMutation.mutateAsync({ id, data })
       navigate(`/posts/${id}`)
-    } catch (error) {
-      console.error('Failed to update post:', error)
+    } catch (err) {
+      console.error('❌ Failed to update post:', err.message)
     }
   }
 
-  // Check if user can edit this post
   const canEdit = user && (user._id === post?.author?._id || user.role === 'admin')
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
       </div>
     )
   }
 
-  if (!post) {
+  if (error || !post) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600">Post not found.</p>
+        <p className="text-red-600">❌ Post not found or failed to load.</p>
       </div>
     )
   }
@@ -44,7 +43,7 @@ const EditPost = () => {
   if (!canEdit) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600">You don't have permission to edit this post.</p>
+        <p className="text-red-600">🚫 You don't have permission to edit this post.</p>
       </div>
     )
   }
@@ -53,15 +52,13 @@ const EditPost = () => {
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Edit Post</h1>
-        <p className="text-gray-600">
-          Update your post content and settings.
-        </p>
+        <p className="text-gray-600">Update your post content and details below.</p>
       </div>
 
-      <div className="card p-8">
-        <PostForm 
+      <div className="bg-white shadow rounded-xl p-8">
+        <PostForm
           post={post}
-          onSubmit={handleSubmit} 
+          onSubmit={handleSubmit}
           loading={updatePostMutation.isLoading}
         />
       </div>

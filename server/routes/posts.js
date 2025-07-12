@@ -1,4 +1,7 @@
 const express = require('express');
+const router = express.Router();
+
+// ✅ Import controller functions
 const {
   getPosts,
   getPost,
@@ -8,20 +11,18 @@ const {
   addComment
 } = require('../controllers/postController');
 
+// ✅ Auth middleware to protect routes
 const { protect } = require('../middleware/auth');
 
-const router = express.Router();
+// 📄 Public Routes
+router.get('/', getPosts);         // Get all posts
+router.get('/:id', getPost);       // Get a single post by ID
 
-router.route('/')
-  .get(getPosts)
-  .post(protect, createPost);
+// 🔐 Protected Routes
+router.post('/', protect, createPost);              // Create a new post
+router.put('/:id', protect, updatePost);            // Update a post
+router.delete('/:id', protect, deletePost);         // Delete a post
+router.post('/:id/comments', protect, addComment);  // Add a comment to a post
 
-router.route('/:id')
-  .get(getPost)
-  .put(protect, updatePost)
-  .delete(protect, deletePost);
-
-router.route('/:id/comments')
-  .post(protect, addComment);
-
+// ✅ Export router
 module.exports = router;

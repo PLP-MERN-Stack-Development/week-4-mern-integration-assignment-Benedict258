@@ -7,21 +7,19 @@ import { AuthContext } from '../context/AuthContext';
 const CreatePost = () => {
   const navigate = useNavigate();
   const createPostMutation = useCreatePost();
-  const { user } = useContext(AuthContext); // ✅ Get current user
+  const { user } = useContext(AuthContext);
 
-  // ✅ Redirect if user is not logged in
   useEffect(() => {
     if (!user) {
       navigate('/login');
     }
   }, [user, navigate]);
 
-  // ✅ Include author (user._id) in form data
   const handleSubmit = async (data) => {
     try {
       const response = await createPostMutation.mutateAsync({
         ...data,
-        author: user._id, // ✅ Add author from context
+        author: user._id,
       });
       navigate(`/posts/${response.data.data._id}`);
     } catch (error) {
@@ -39,11 +37,7 @@ const CreatePost = () => {
       </div>
 
       <div className="card p-8">
-        {/* ✅ Pass loading state and submit handler */}
-        <PostForm 
-          onSubmit={handleSubmit} 
-          loading={createPostMutation.isLoading}
-        />
+        <PostForm onSubmit={handleSubmit} loading={createPostMutation.isLoading} />
       </div>
     </div>
   );

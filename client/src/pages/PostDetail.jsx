@@ -9,18 +9,18 @@ const PostDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user, isAuthenticated } = useAuth()
+
   const { data: postData, isLoading, error } = usePost(id)
   const deletePostMutation = useDeletePost()
 
   const post = postData?.data?.data
 
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
+  const formatDate = (date) =>
+    new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     })
-  }
 
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this post?')) {
@@ -33,14 +33,15 @@ const PostDetail = () => {
     }
   }
 
-  const canEditPost = isAuthenticated && user && (
-    user._id === post?.author?._id || user.role === 'admin'
-  )
+  const canEditPost =
+    isAuthenticated &&
+    user &&
+    (user._id === post?.author?._id || user.role === 'admin')
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
       </div>
     )
   }
@@ -58,20 +59,20 @@ const PostDetail = () => {
 
   return (
     <article className="max-w-4xl mx-auto">
-      {/* Back Button */}
-      <Link 
-        to="/" 
+      {/* Back */}
+      <Link
+        to="/"
         className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
       >
         <ArrowLeft className="h-5 w-5" />
         <span>Back to Posts</span>
       </Link>
 
-      {/* Post Header */}
+      {/* Header */}
       <header className="mb-8">
-        {/* Category Badge */}
+        {/* Category */}
         <div className="mb-4">
-          <span 
+          <span
             className="inline-block px-3 py-1 text-sm font-medium text-white rounded-full"
             style={{ backgroundColor: post.category?.color || '#3B82F6' }}
           >
@@ -84,7 +85,7 @@ const PostDetail = () => {
           {post.title}
         </h1>
 
-        {/* Meta Information */}
+        {/* Meta */}
         <div className="flex flex-wrap items-center gap-6 text-gray-600 mb-6">
           <div className="flex items-center space-x-2">
             <User className="h-5 w-5" />
@@ -100,10 +101,10 @@ const PostDetail = () => {
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Edit/Delete */}
         {canEditPost && (
           <div className="flex items-center space-x-4 mb-6">
-            <Link 
+            <Link
               to={`/edit/${post._id}`}
               className="btn btn-secondary flex items-center space-x-2"
             >
@@ -116,16 +117,18 @@ const PostDetail = () => {
               className="btn btn-danger flex items-center space-x-2 disabled:opacity-50"
             >
               <Trash2 className="h-4 w-4" />
-              <span>{deletePostMutation.isLoading ? 'Deleting...' : 'Delete'}</span>
+              <span>
+                {deletePostMutation.isLoading ? 'Deleting...' : 'Delete'}
+              </span>
             </button>
           </div>
         )}
 
         {/* Tags */}
-        {post.tags && post.tags.length > 0 && (
+        {post.tags?.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-6">
             {post.tags.map((tag, index) => (
-              <span 
+              <span
                 key={index}
                 className="px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded-full"
               >
@@ -136,14 +139,14 @@ const PostDetail = () => {
         )}
       </header>
 
-      {/* Post Content */}
+      {/* Content */}
       <div className="prose prose-lg max-w-none mb-12">
         <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
           {post.content}
         </div>
       </div>
 
-      {/* Comments Section */}
+      {/* Comments */}
       <CommentSection post={post} />
     </article>
   )
